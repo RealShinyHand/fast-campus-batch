@@ -4,18 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 
-@Entity
 @Getter
 @Setter
-@Table(name="plain_text")
-@DynamicUpdate
+@Entity
+@Table(name = "result_text")
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlainText {
+public class ResultText {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

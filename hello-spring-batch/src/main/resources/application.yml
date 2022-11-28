@@ -23,3 +23,12 @@ spring:
   batch:
     jdbc:
       initialize-schema: ALWAYS
+
+---
+spring:
+  config:
+    activate:
+      on-profile:
+        - 'local'
+    jpa:
+      database: h2
