@@ -10,6 +10,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,13 +22,13 @@ public class HelloJobConfig {
     private final StepBuilderFactory stepBuilderFactory;
 
     @Bean("helloJob")
-    public Job helloJob(Step step){
+    public Job helloJob(@Qualifier("helloStep") Step step){
         return builderFactory.get("helloJob")
                 .incrementer(new RunIdIncrementer())
                 //자동으로 실행횟수 증가시켜줌
                 .start(step)
                 .build();
-    }
+}
 
     @Bean("helloStep")
     @JobScope //job이 실행되는 동안에만 살아 있음
