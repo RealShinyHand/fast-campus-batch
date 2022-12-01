@@ -2,6 +2,7 @@ package com.fastcampus.hellospringbatch.job.player;
 
 import com.fastcampus.hellospringbatch.core.dto.PlayerDto;
 import com.fastcampus.hellospringbatch.core.dto.PlayerSalaryDto;
+import com.fastcampus.hellospringbatch.core.service.PlayerSalaryService;
 import lombok.AllArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -10,7 +11,9 @@ import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.adapter.ItemProcessorAdapter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
@@ -44,23 +47,35 @@ public class PlayerJobConfig {
     @JobScope
     @Bean("flatFileStep")
     public Step flatFileStep(
-          @Qualifier("flatFileItemReader")  FlatFileItemReader<PlayerDto> flatFileItemReader
+          @Qualifier("flatFileItemReader")  FlatFileItemReader<PlayerDto> flatFileItemReader,
+          PlayerSalaryService playerSalaryService,
+          ItemProcessorAdapter itemProcessorAdapter
     ){
         return stepBuilderFactory.get("flatFileStep")
-                .<PlayerDto, PlayerDto>chunk(5)
+                .<PlayerDto, PlayerSalaryDto>chunk(5)
                 .reader(flatFileItemReader)
 
-               // .processor()
+               .processor(itemProcessorAdapter)
                 .writer(
-                        new ItemWriter<PlayerDto>() {
+                        new ItemWriter<PlayerSalaryDto>() {
                             @Override
-                            public void write(List<? extends PlayerDto> items) throws Exception {
+                            public void write(List<? extends PlayerSalaryDto> items) throws Exception {
                                 items.forEach(System.out::println);
                             }
                         }
                 )
                 .build();
     }
+
+    @StepScope
+    @Bean
+    public ItemProcessorAdapter<PlayerDto,PlayerSalaryDto> playerSalaryDtoItemProcessorAdapter(PlayerSalaryService playerSalaryService){
+        ItemProcessorAdapter<PlayerDto,PlayerSalaryDto> adapter = new ItemProcessorAdapter<>();
+        adapter.setTargetObject(playerSalaryService);
+        adapter.setTargetMethod("calcSalary");
+        return adapter;
+    }
+
 
     @StepScope
     @Bean("flatFileItemReader")
